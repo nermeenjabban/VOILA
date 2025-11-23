@@ -23,6 +23,8 @@ class Category extends Model
         return $this->hasMany(Article::class);
     }
 
+    
+
     /**
      * الحصول على المقالات المنشورة فقط
      */
@@ -44,4 +46,7 @@ class Category extends Model
             }
         });
     }
+    
+
+    
 }

@@ -17,6 +17,7 @@ return new class extends Migration
         $table->id();
         $table->string('name');
         $table->string('email');
+       
         $table->text('message');
         $table->boolean('reviewed')->default(false);
         $table->timestamps();

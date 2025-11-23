@@ -42,19 +42,37 @@ class HomeController extends Controller
         return $this->index($request);
     }
 
-    public function category($id)
-    {
-        // عرض المقالات حسب التصنيف
-        $category = Category::findOrFail($id);
+    // public function category($id)
+    // {
+    //     // عرض المقالات حسب التصنيف
+    //     $category = Category::findOrFail($id);
         
-        $articles = Article::where('is_published', true)
-                          ->where('category_id', $id)
-                          ->with(['category', 'author'])
-                          ->latest()
-                          ->paginate(6);
+    //     $articles = Article::where('is_published', true)
+    //                       ->where('category_id', $id)
+    //                       ->with(['category', 'author'])
+    //                       ->latest()
+    //                       ->paginate(6);
 
-        $categories = Category::all();
+    //     $categories = Category::all();
 
-        return view('frontend.home', compact('articles', 'categories', 'category'));
-    }
+    //     return view('frontend.home', compact('articles', 'categories', 'category'));
+    // }
+
+    public function category($id)
+{
+    // العثور على التصنيف أو عرض خطأ 404
+    $category = Category::findOrFail($id);
+    
+    // جلب جميع المقالات المنشورة في هذا التصنيف
+    $articles = Article::where('is_published', true)
+                      ->where('category_id', $id)
+                      ->with('category', 'author')
+                      ->latest()
+                      ->paginate(9); // 9 مقالات في الصفحة
+
+    // جلب جميع التصنيفات للقائمة الجانبية
+    $categories = Category::all();
+
+    return view('frontend.categories.show', compact('category', 'articles', 'categories'));
+}
 }

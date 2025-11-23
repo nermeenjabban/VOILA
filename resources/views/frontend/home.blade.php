@@ -102,9 +102,9 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-envelope me-1"></i>اتصل بنا
-                        </a>
+                    <a class="nav-link" href="{{ route('contact.index') }}">
+    <i class="fas fa-envelope me-1"></i>اتصل بنا
+</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/admin">
@@ -123,9 +123,10 @@
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                             @foreach($categories as $category)
                                 <li>
-                                <a class="dropdown-item" href="/category/{{ $category->id }}">
-                                        {{ $category->name }}
-                                    </a>
+                                <!-- في قائمة التصنيفات المنسدلة -->
+<a class="dropdown-item" href="/category/{{ $category->id }}">
+    {{ $category->name }}
+</a>
                                 </li>
                             @endforeach
                         </ul>

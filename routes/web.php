@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\ArticleController;
+use App\Http\Controllers\Frontend\ContactController;
 use Illuminate\Support\Facades\Route;
 
 // المسارات العامة
@@ -28,3 +29,6 @@ Route::get('/search', [HomeController::class, 'search'])->name('search');
 Route::get('/category/{id}', [HomeController::class, 'category'])->name('category.articles');
 Route::get('/articles/{id}', [ArticleController::class, 'show'])->name('articles.show');
 Route::post('/articles/{id}/comments', [ArticleController::class, 'storeComment'])->name('articles.comments.store');
+Route::get('/category/{id}', [HomeController::class, 'category'])->name('category.articles');
+Route::get('/contact', [ContactController::class, 'index'])->name('contact.index');
+Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
