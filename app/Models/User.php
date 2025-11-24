@@ -14,7 +14,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role'
+        'role',
+        'is_active'
     ];
 
     protected $hidden = [
@@ -24,6 +25,7 @@ class User extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'is_active' => 'boolean',
     ];
 
     /**
@@ -53,5 +55,21 @@ class User extends Authenticatable
     public function publishedArticles()
     {
         return $this->hasMany(Article::class, 'author_id')->where('is_published', true);
+    }
+
+    /**
+     * نطاق للمستخدمين النشطين
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    /**
+     * نطاق للمستخدمين المعطلين
+     */
+    public function scopeInactive($query)
+    {
+        return $query->where('is_active', false);
     }
 }

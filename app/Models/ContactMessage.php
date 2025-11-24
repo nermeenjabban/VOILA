@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class ContactMessage extends Model
 {
@@ -11,7 +12,7 @@ class ContactMessage extends Model
 
     protected $fillable = [
         'name',
-        'email', 
+        'email',
         'subject',
         'message',
         'reviewed'
@@ -35,5 +36,37 @@ class ContactMessage extends Model
     public function scopeRead($query)
     {
         return $query->where('reviewed', true);
+    }
+
+    /**
+     * الحصول على محتوى مختصر للرسالة
+     */
+    public function getExcerptAttribute()
+    {
+        return Str::limit($this->message, 100);
+    }
+
+    /**
+     * الحصول على اسم المرسل مع إخفاء جزء من البريد الإلكتروني
+     */
+    public function getSenderDisplayAttribute()
+    {
+        return $this->name . ' (' . Str::mask($this->email, '*', 3) . ')';
+    }
+
+    /**
+     * الحصول على حالة الرسالة
+     */
+    public function getStatusAttribute()
+    {
+        return $this->reviewed ? 'مقروءة' : 'جديدة';
+    }
+
+    /**
+     * الحصول على لون الحالة
+     */
+    public function getStatusColorAttribute()
+    {
+        return $this->reviewed ? 'success' : 'warning';
     }
 }

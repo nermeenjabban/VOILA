@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+
 class Article extends Model
 {
     use HasFactory;
@@ -17,13 +18,32 @@ class Article extends Model
         'author_id',
         'category_id',
         'is_published',
-        'published_at'
+        'published_at',
+        'comments_enabled'
     ];
 
     protected $casts = [
         'is_published' => 'boolean',
-        'published_at' => 'datetime'
+        'published_at' => 'datetime',
+        'comments_enabled' => 'boolean',
     ];
+    
+    // العلاقة مع التعليقات
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
+    
+    public function approvedComments()
+    {
+        return $this->hasMany(Comment::class)->where('approved', true);
+    }
+    
+    // نطاق للمقالات التي يمكن التعليق عليها
+    public function scopeCommentsEnabled($query)
+    {
+        return $query->where('comments_enabled', true);
+    }
 
     /**
      * العلاقة مع المستخدم (المؤلف)
@@ -44,18 +64,12 @@ class Article extends Model
     /**
      * العلاقة مع التعليقات
      */
-    public function comments()
-    {
-        return $this->hasMany(Comment::class);
-    }
+  
 
     /**
      * الحصول على التعليقات المقبولة فقط
      */
-    public function approvedComments()
-    {
-        return $this->hasMany(Comment::class)->where('approved', true);
-    }
+  
 
     /**
      * نطاق للمقالات المنشورة فقط

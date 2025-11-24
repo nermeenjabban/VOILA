@@ -23,7 +23,10 @@ class Category extends Model
         return $this->hasMany(Article::class);
     }
 
-    
+    public function articlesCount()
+{
+    return $this->articles()->count();
+}
 
     /**
      * الحصول على المقالات المنشورة فقط

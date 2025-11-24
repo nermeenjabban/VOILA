@@ -31,22 +31,28 @@ class ArticleController extends Controller
 
     public function storeComment(Request $request, $articleId)
     {
+        $article = Article::where('is_published', true)->findOrFail($articleId);
+    
+        // التحقق من إمكانية التعليق على المقال
+        if (!$article->comments_enabled) {
+            return redirect()->back()
+                ->with('error', 'التعليقات معطلة على هذا المقال.');
+        }
+    
         $request->validate([
             'author_name' => 'required|string|max:255',
             'author_email' => 'required|email|max:255',
             'content' => 'required|string|min:5|max:1000',
         ]);
-
-        $article = Article::where('is_published', true)->findOrFail($articleId);
-
+    
         Comment::create([
             'article_id' => $article->id,
             'author_name' => $request->author_name,
             'author_email' => $request->author_email,
             'content' => $request->content,
-            'approved' => false, // يحتاج موافقة المشرف
+            'approved' => false,
         ]);
-
+    
         return redirect()->route('articles.show', $article->id)
                         ->with('success', 'تم إرسال تعليقك بنجاح وسيظهر بعد المراجعة.');
     }
