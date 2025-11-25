@@ -61,19 +61,17 @@ class Article extends Model
         return $this->belongsTo(Category::class, 'category_id');
     }
 
-    /**
-     * العلاقة مع التعليقات
-     */
-  
+    public function getImageUrlAttribute()
+    {
+        if ($this->image) {
+            // غير المسار إلى public/articles/
+            return asset('articles/' . $this->image);
+        }
+        
+        return asset('images/default-article.jpg');
+    }
 
-    /**
-     * الحصول على التعليقات المقبولة فقط
-     */
-  
-
-    /**
-     * نطاق للمقالات المنشورة فقط
-     */
+   
     public function scopePublished($query)
     {
         return $query->where('is_published', true);

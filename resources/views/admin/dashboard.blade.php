@@ -11,7 +11,7 @@
     ];
 @endphp
 
-<!-- في قسم الإحصائيات أضيفي -->
+
 <div class="col-xl-3 col-md-6 mb-4">
     <div class="card border-0 shadow-sm h-100">
         <div class="card-body text-center">
