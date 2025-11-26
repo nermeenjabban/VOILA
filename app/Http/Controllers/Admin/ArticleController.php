@@ -15,33 +15,29 @@ class ArticleController extends Controller
     {
         $query = Article::with(['category', 'author']);
         
-
-        // البحث
-        if ($request->has('search') && $request->search != '') {
-            $query->where('title', 'like', '%' . $request->search . '%')
-                  ->orWhere('content', 'like', '%' . $request->search . '%');
+        // إذا كان المستخدم محرراً، يرى فقط مقالاته
+        if (auth()->user()->role === 'editor') {
+            $query->where('author_id', auth()->id());
         }
-
-        // التصفية حسب التصنيف
-        if ($request->has('category_id') && $request->category_id != '') {
+        
+        // البحث والتصفية
+        if ($request->has('search') && $request->search) {
+            $query->where('title', 'like', '%' . $request->search . '%');
+        }
+        
+        if ($request->has('category_id') && $request->category_id) {
             $query->where('category_id', $request->category_id);
         }
-
-        // التصفية حسب الحالة
-        if ($request->has('status') && $request->status != '') {
-            if ($request->status == 'published') {
-                $query->where('is_published', true);
-            } elseif ($request->status == 'draft') {
-                $query->where('is_published', false);
-            }
+        
+        if ($request->has('status') && $request->status) {
+            $query->where('is_published', $request->status === 'published');
         }
-
+        
         $articles = $query->latest()->paginate(10);
-        $categories = Category::all();
-
+        $categories = \App\Models\Category::all();
+        
         return view('admin.articles.index', compact('articles', 'categories'));
     }
-
     public function create()
     {
         $categories = Category::all();
@@ -50,35 +46,78 @@ class ArticleController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'category_id' => 'required|exists:categories,id',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'is_published' => 'boolean',
+            'comments_enabled' => 'boolean',
         ]);
-
-        $article = new Article();
-        $article->title = $request->title;
-        $article->slug = Str::slug($request->title);
-        $article->content = $request->content;
-        $article->category_id = $request->category_id;
-        $article->author_id = auth()->id();
-        $article->is_published = $request->has('is_published');
-
+    
+        // معالجة الصورة - تخزين في public/articles/
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('articles', 'public');
-            $article->image = $imagePath;
+            $image = $request->file('image');
+            
+            // إنشاء اسم فريد للصورة
+            $imageName = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
+            
+            // نقل الصورة إلى public/articles/
+            $image->move(public_path('articles'), $imageName);
+            
+            // حفظ المسار الكامل في الداتابيس: articles/اسم_الصورة
+            $validated['image'] = 'articles/' . $imageName;
         }
-
-        if ($article->is_published) {
-            $article->published_at = now();
-        }
-
-        $article->save();
-
+    
+        $validated['author_id'] = auth()->id();
+        $validated['slug'] = Str::slug($request->title);
+        $validated['is_published'] = $request->has('is_published');
+        $validated['comments_enabled'] = $request->has('comments_enabled');
+    
+        Article::create($validated);
+    
         return redirect()->route('admin.articles.index')
-            ->with('success', 'تم إنشاء المقال بنجاح.');
+            ->with('success', 'تم إنشاء المقال بنجاح');
+    }
+
+    public function update(Request $request, Article $article)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'is_published' => 'boolean',
+            'comments_enabled' => 'boolean',
+        ]);
+    
+        // معالجة الصورة - تخزين في public/articles/
+        if ($request->hasFile('image')) {
+            // حذف الصورة القديمة إذا موجودة
+            if ($article->image && file_exists(public_path($article->image))) {
+                unlink(public_path($article->image));
+            }
+    
+            $image = $request->file('image');
+            
+            // إنشاء اسم فريد للصورة
+            $imageName = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
+            
+            // نقل الصورة إلى public/articles/
+            $image->move(public_path('articles'), $imageName);
+            
+            // حفظ المسار الكامل في الداتابيس: articles/اسم_الصورة
+            $validated['image'] = 'articles/' . $imageName;
+        }
+    
+        $validated['slug'] = Str::slug($request->title);
+        $validated['is_published'] = $request->has('is_published');
+        $validated['comments_enabled'] = $request->has('comments_enabled');
+    
+        $article->update($validated);
+    
+        return redirect()->route('admin.articles.index')
+            ->with('success', 'تم تحديث المقال بنجاح');
     }
 
     public function show(Article $article)
@@ -86,49 +125,19 @@ class ArticleController extends Controller
         return view('admin.articles.show', compact('article'));
     }
 
+    public function preview(Article $article)
+{
+    // معاينة المقال حتى لو كان مسودة
+    return view('articles.show', compact('article'));
+}
+
     public function edit(Article $article)
     {
         $categories = Category::all();
         return view('admin.articles.edit', compact('article', 'categories'));
     }
 
-    public function update(Request $request, Article $article)
-    {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
-            'category_id' => 'required|exists:categories,id',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'is_published' => 'boolean',
-        ]);
-
-        $article->title = $request->title;
-        $article->slug = Str::slug($request->title);
-        $article->content = $request->content;
-        $article->category_id = $request->category_id;
-        
-        // إذا كانت المقالة غير منشورة وأصبحت منشورة
-        if (!$article->is_published && $request->has('is_published')) {
-            $article->published_at = now();
-        }
-        
-        $article->is_published = $request->has('is_published');
-
-        if ($request->hasFile('image')) {
-            // حذف الصورة القديمة إذا كانت موجودة
-            if ($article->image) {
-                Storage::disk('public')->delete($article->image);
-            }
-            
-            $imagePath = $request->file('image')->store('articles', 'public');
-            $article->image = $imagePath;
-        }
-
-        $article->save();
-
-        return redirect()->route('admin.articles.index')
-            ->with('success', 'تم تحديث المقال بنجاح.');
-    }
+   
 
     public function destroy(Article $article)
     {

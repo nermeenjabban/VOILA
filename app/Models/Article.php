@@ -70,7 +70,13 @@ class Article extends Model
         
         return asset('images/default-article.jpg');
     }
-
+    public function scopeForEditor($query)
+    {
+        if (auth()->user()->role === 'editor') {
+            return $query->where('author_id', auth()->id());
+        }
+        return $query;
+    }
    
     public function scopePublished($query)
     {

@@ -156,7 +156,7 @@
                                                     @if($message->reviewed)
                                                         <form action="{{ route('admin.contact-messages.mark-unread', $message) }}" method="POST" class="d-inline">
                                                             @csrf
-                                                            @method('PATCH')
+                                                            @method('POST')
                                                             <button type="submit" class="btn btn-sm btn-warning" title="تحديد كغير مقروءة">
                                                                 <i class="fas fa-envelope"></i>
                                                             </button>
@@ -164,7 +164,7 @@
                                                     @else
                                                         <form action="{{ route('admin.contact-messages.mark-reviewed', $message) }}" method="POST" class="d-inline">
                                                             @csrf
-                                                            @method('PATCH')
+                                                            @method('POST')
                                                             <button type="submit" class="btn btn-sm btn-success" title="تحديد كمقروءة">
                                                                 <i class="fas fa-check"></i>
                                                             </button>

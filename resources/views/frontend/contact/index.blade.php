@@ -306,7 +306,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/admin">
+                        <a class="nav-link" href="/login">
                             <i class="fas fa-cog me-1"></i>لوحة التحكم
                         </a>
                     </li>

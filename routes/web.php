@@ -47,7 +47,10 @@ Route::middleware(['auth', 'editor'])->group(function () {
         Route::delete('/articles/{article}', [AdminArticleController::class, 'destroy'])->name('admin.articles.destroy');
         Route::patch('/articles/{article}/toggle-publish', [AdminArticleController::class, 'togglePublish'])->name('admin.articles.toggle-publish');
         Route::patch('/articles/{article}/toggle-comments', [AdminArticleController::class, 'toggleArticleComments'])->name('admin.articles.toggle-comments');
-
+        // معاينة المقالات (حتى المسودات)
+Route::get('/preview/{article}', [ArticleController::class, 'preview'])
+->name('articles.preview')
+->middleware('auth'); // فقط للمستخدمين المسجلين
         // إدارة التصنيفات
         Route::get('/categories', [AdminCategoryController::class, 'index'])->name('admin.categories.index');
         Route::get('/categories/create', [AdminCategoryController::class, 'create'])->name('admin.categories.create');
@@ -65,6 +68,9 @@ Route::middleware(['auth', 'editor'])->group(function () {
         Route::delete('/comments/{comment}', [AdminCommentController::class, 'destroy'])->name('admin.comments.destroy');
         Route::post('/comments/bulk-action', [AdminCommentController::class, 'bulkAction'])->name('admin.comments.bulk-action');
 
+
+
+        
         // إدارة رسائل الاتصال
         Route::get('/contact-messages', [AdminContactMessageController::class, 'index'])->name('admin.contact-messages.index');
         Route::get('/contact-messages/{contactMessage}', [AdminContactMessageController::class, 'show'])->name('admin.contact-messages.show');

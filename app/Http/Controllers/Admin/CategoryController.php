@@ -37,9 +37,17 @@ class CategoryController extends Controller
             ->with('success', 'تم إنشاء التصنيف بنجاح.');
     }
 
-    public function show(Category $category)
+    public function show($id)
     {
-        $articles = $category->articles()->with('author')->latest()->paginate(10);
+        // البحث عن التصنيف
+        $category = Category::findOrFail($id);
+        
+        // جلب المقالات المرتبطة بالتصنيف مع الترقيم
+        $articles = $category->articles()
+            ->with('author', 'category')
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
         return view('admin.categories.show', compact('category', 'articles'));
     }
 
